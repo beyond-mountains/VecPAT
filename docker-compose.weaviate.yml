@@ -1,0 +1,42 @@
+name: vecpat-weaviate
+
+services:
+  weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.39.7
+    restart: unless-stopped
+    command: ["--host", "0.0.0.0", "--port", "8080", "--scheme", "http"]
+    cpuset: ${VECPAT_CPUSET:-13-20}
+    mem_limit: ${VECPAT_MEMORY:-32g}
+    memswap_limit: ${VECPAT_MEMORY:-32g}
+    environment:
+      QUERY_DEFAULTS_LIMIT: "100"
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: /var/lib/weaviate
+      DEFAULT_VECTORIZER_MODULE: none
+      ENABLE_MODULES: ""
+      CLUSTER_HOSTNAME: vecpat-weaviate
+    volumes:
+      - ./data/weaviate:/var/lib/weaviate
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/v1/.well-known/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 90
+      start_period: 5s
+
+  weaviate-runner:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: Dockerfile.weaviate
+    entrypoint: ["python", "-m", "src.backends.weaviate.cli"]
+    environment:
+      WEAVIATE_URL: http://weaviate:8080
+    volumes:
+      - ./src:/app/src:ro
+      - ./configs:/app/configs:ro
+      - ${RESULT_DIR:-./results}:/app/result
+    depends_on:
+      weaviate:
+        condition: service_healthy
+

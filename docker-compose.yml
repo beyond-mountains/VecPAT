@@ -1,0 +1,32 @@
+name: vecpat-qdrant
+
+services:
+  qdrant:
+    image: ${QDRANT_IMAGE:-qdrant/qdrant:v1.19.0}
+    restart: unless-stopped
+    cpuset: ${VECPAT_CPUSET:-13-20}
+    mem_limit: ${VECPAT_MEMORY:-32g}
+    memswap_limit: ${VECPAT_MEMORY:-32g}
+    environment:
+      QDRANT__SERVICE__HARDWARE_REPORTING: "true"
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333'"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  runner:
+    build: .
+    entrypoint: ["python", "-m", "src.backends.qdrant.cli"]
+    environment:
+      QDRANT_URL: http://qdrant:6333
+    volumes:
+      - ./src:/app/src:ro
+      - ./configs:/app/configs:ro
+      - ${RESULT_DIR:-./results}:/app/result
+    depends_on:
+      qdrant:
+        condition: service_healthy
+

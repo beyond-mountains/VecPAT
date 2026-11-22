@@ -1,0 +1,32 @@
+experiment:
+  name: vecpat_qdrant_smoke
+  seed: 20261002
+  collection: vecpat_smoke
+dataset:
+  points: 2000
+  dimensions: 32
+  tenants: 20
+  levels: 8
+  age_universe: 1000
+  correlation: 0.85
+  batch_size: 500
+index:
+  hnsw_m: 8
+  ef_construct: 32
+  full_scan_threshold: 10
+  indexing_threshold: 100
+workload:
+  campaign_continuous: true
+  campaign_1002: false
+  transformation_strengths: [2]
+  case_names: [boundary_min_max_in_to_or]
+  patterns: []
+  queries_per_case: 1
+  warmups: 1
+  repetitions: 2
+  exact_repetitions: 1
+  top_k: [10]
+  ef_search: [16]
+oracle:
+  latency_ratio: 2.0
+

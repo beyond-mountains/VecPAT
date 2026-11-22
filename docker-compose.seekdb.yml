@@ -1,0 +1,37 @@
+name: vecpat-seekdb
+
+services:
+  seekdb:
+    image: oceanbase/seekdb:1.4.0-100000172026082615
+    cpuset: ${VECPAT_CPUSET:-13-20}
+    mem_limit: ${VECPAT_MEMORY:-32g}
+    memswap_limit: ${VECPAT_MEMORY:-32g}
+    environment:
+      ROOT_PASSWORD: anomaly-local-only
+      CPU_COUNT: "8"
+      MEMORY_LIMIT: 32G
+      LOG_DISK_SIZE: 16G
+      DATAFILE_SIZE: 16G
+      DATAFILE_NEXT: 8G
+      DATAFILE_MAXSIZE: 64G
+    volumes:
+      - ./data/seekdb:/var/lib/seekdb
+
+  seekdb-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.seekdb
+    entrypoint: ["python", "-m", "src.backends.seekdb.cli"]
+    environment:
+      SEEKDB_HOST: seekdb
+      SEEKDB_PORT: "2881"
+      SEEKDB_USER: root
+      SEEKDB_PASSWORD: anomaly-local-only
+      SEEKDB_DATABASE: filter_anomaly
+    volumes:
+      - ./src:/app/src:ro
+      - ./configs:/app/configs:ro
+      - ${RESULT_DIR:-./results}:/app/result
+    depends_on:
+      - seekdb
+

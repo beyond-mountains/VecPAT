@@ -1,0 +1,1 @@
+"""seekDB adapter and CLI."""

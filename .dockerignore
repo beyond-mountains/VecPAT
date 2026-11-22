@@ -1,0 +1,8 @@
+data
+results
+continuous_state
+**/__pycache__
+*.pyc
+*.sqlite*
+.git
+

@@ -1,0 +1,25 @@
+experiment: {name: pgvector_1002_expanded_generation, seed: 20261002, table: efa_pgvector_full}
+dataset: {points: 200000, dimensions: 128, tenants: 100, levels: 32, age_universe: 1000, correlation: 0.85, batch_size: 1000}
+index: {hnsw_m: 16, ef_construct: 128, full_scan_threshold: 10}
+workload:
+  campaign_1002: true
+  transformation_strengths: [2, 8, 32, 128]
+  queries_per_case: 2
+  warmups: 1
+  repetitions: 3
+  exact_repetitions: 1
+  top_k: [10, 100]
+  ef_search: [16, 64]
+oracle: {latency_ratio: 2.0}
+ann_campaign:
+  collection_prefix: efa1002
+  points: 20000
+  dimensions: 128
+  queries: 12
+  repetitions: 5
+  warmups: 1
+  top_k: [10, 100]
+  ef_search: [16, 64]
+  scale_factor: 3.0
+  subset_category5: 1
+

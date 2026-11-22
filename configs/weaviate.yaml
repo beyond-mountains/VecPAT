@@ -1,0 +1,42 @@
+experiment:
+  name: weaviate_1002_equivalent_filter
+  seed: 20261002
+  class_prefix: EfaWeaviate1002
+dataset:
+  points: 200000
+  dimensions: 128
+  tenants: 100
+  levels: 32
+  age_universe: 1000
+  correlation: 0.85
+  batch_size: 400
+index:
+  hnsw_m: 16
+  ef_construct: 128
+ann_campaign:
+  collection_prefix: efa1002
+  points: 20000
+  dimensions: 128
+  queries: 12
+  repetitions: 5
+  warmups: 1
+  top_k: [10, 100]
+  ef_search: [16, 64]
+  scale_factor: 3.0
+  subset_category5: 1
+workload:
+  campaign_1002: true
+  transformation_strengths: [2, 8, 32, 128]
+  queries_per_case: 2
+  warmups: 2
+  repetitions: 4
+  order_seed: 20261007
+  top_k: [10, 100]
+  ef_search: [16, 64]
+confirmation:
+  queries_per_case: 6
+  warmups: 4
+  repetitions: 10
+  order_seed: 20261007
+oracle:
+  latency_ratio: 2.0
