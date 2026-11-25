@@ -1,5 +1,9 @@
 # VecPAT
 
+## Supplementary Materials
+
+- [Formalization of VecPAT Equivalence-Preserving Transformation Rules (PDF)](./vecpat_rules.pdf)
+
 **Finding Performance Anomalies in Filtered Vector Search via Equivalent Query Transformations**
 
 VecPAT is a rule-guided performance testing framework for filtered approximate nearest neighbor search (FANNS). It constructs semantically equivalent query pairs, translates them into backend-specific syntax, and validates their semantic equivalence. It then compares their execution latencies under controlled experimental conditions to identify potential performance anomalies.
