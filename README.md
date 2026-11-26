@@ -2,6 +2,7 @@
 
 ## Supplementary Materials
 
+- [Technical Report](./VecPAT_technical_report.pdf)
 - [Formalization of VecPAT Equivalence-Preserving Transformation Rules (PDF)](./vecpat_rules.pdf)
 
 **Finding Performance Anomalies in Filtered Vector Search via Equivalent Query Transformations**
@@ -17,40 +18,40 @@ To date, VecPAT has uncovered 55 performance anomalies: 14 in seekDB, 10 in Milv
 
 VecPAT runs each test through three stages:
 
-1. **Query construction.** A backend-independent AST represents the original and equivalent predicates. It generates query pairs using equivalence-preserving transformation rules. Transformations vary constants, expansion strength, Boolean-tree shape, data distribution, selectivity, Top-K, and HNSW search parameters.
-2. **Equivalence validation.** A reference interpreter checks the generated ASTs over a controlled metadata domain. The backend then verifies the complete eligible set. Exact vector search provides the Top-K ground truth.
-3. **Performance anomaly detection.** Original and equivalent queries use the same dataset and query vector. Discovery screens candidates; confirmation repeats them with deterministic, fully balanced AB/BA ordering. VecPAT records client end-to-end latency, exact latency, Recall@K, raw samples, and execution metadata.
+1. **Query construction.** 
+2. **Equivalence validation.** 
+3. **Performance anomaly detection.** 
 
 ## Equivalence rules
 
 ### Filter rules
 
-| ID | Transformation family | Representative equivalence |
-|---|---|---|
-| F1 | Operator equivalence | range, membership, bounds, and equality-OR representations |
-| F2 | Boolean idempotence | `P = P AND ... AND P`; `P = P OR ... OR P` |
-| F3 | Boolean identity | `F = F AND TRUE`; `F = F OR FALSE` |
-| F4 | Negation equivalence | double negation and De Morgan transformations |
-| F5 | Absorption | `F = F OR (F AND G)` and its dual |
-| F6 | Distribution | factored predicates versus DNF/CNF expansion |
-| F7 | Structural reordering | commutative/associative reorderings and alternative AST shapes |
-| F8 | Implication redundancy | append predicates already implied by the original predicate |
-| F9 | Predicate decomposition | a discrete range partitioned into disjoint ranges or equalities |
-| F10 | Complement equivalence | membership in `S` versus negated membership in `U-S` |
-| F11 | Set idempotence | duplicate and reorder membership values |
-| F12 | Arithmetic predicate equivalence | translation, scaling, identity, and cancellation rewrites |
+| ID  | Transformation family            | Representative equivalence                                      |
+| --- | -------------------------------- | --------------------------------------------------------------- |
+| F1  | Operator equivalence             | range, membership, bounds, and equality-OR representations      |
+| F2  | Boolean idempotence              | `P = P AND ... AND P`; `P = P OR ... OR P`                      |
+| F3  | Boolean identity                 | `F = F AND TRUE`; `F = F OR FALSE`                              |
+| F4  | Negation equivalence             | double negation and De Morgan transformations                   |
+| F5  | Absorption                       | `F = F OR (F AND G)` and its dual                               |
+| F6  | Distribution                     | factored predicates versus DNF/CNF expansion                    |
+| F7  | Structural reordering            | commutative/associative reorderings and alternative AST shapes  |
+| F8  | Implication redundancy           | append predicates already implied by the original predicate     |
+| F9  | Predicate decomposition          | a discrete range partitioned into disjoint ranges or equalities |
+| F10 | Complement equivalence           | membership in `S` versus negated membership in `U-S`            |
+| F11 | Set idempotence                  | duplicate and reorder membership values                         |
+| F12 | Arithmetic predicate equivalence | translation, scaling, identity, and cancellation rewrites       |
 
 F12 is executed on Milvus, pgvector, and seekDB. Qdrant and Weaviate do not expose field arithmetic in their filter DSLs, so VecPAT does not generate F12 executions for those backends.
 
 ### Vector and filter–ANN rules
 
-| ID | Transformation |
-|---|---|
-| A1 | Apply the same dimension permutation to all data and query vectors |
-| A2 | Apply the same positive scaling factor under L2 distance |
-| A3 | Compare cosine, inner product, and L2 rankings for unit vectors |
-| A4 | Compare L2 and squared-L2 as a monotonic distance transformation; currently oracle-only |
-| FA1 | No filter versus a filter that selects the full dataset |
+| ID  | Transformation                                                                                 |
+| --- | ---------------------------------------------------------------------------------------------- |
+| A1  | Apply the same dimension permutation to all data and query vectors                             |
+| A2  | Apply the same positive scaling factor under L2 distance                                       |
+| A3  | Compare cosine, inner product, and L2 rankings for unit vectors                                |
+| A4  | Compare L2 and squared-L2 as a monotonic distance transformation; currently oracle-only        |
+| FA1 | No filter versus a filter that selects the full dataset                                        |
 | FA2 | Filter the full dataset versus search an exactly materialized eligible subset without a filter |
 
 ## Confirmed and reported anomalies
@@ -59,49 +60,49 @@ The following cases were reproduced by the balanced confirmation workflow and re
 
 ### seekDB
 
-| Rule | Issue |
-|---|---|
-| F1 | [oceanbase/seekdb#1501](https://github.com/oceanbase/seekdb/issues/1501) |
-| F2 | [oceanbase/seekdb#1439](https://github.com/oceanbase/seekdb/issues/1439) |
-| F3 | [oceanbase/seekdb#1489](https://github.com/oceanbase/seekdb/issues/1489) |
-| F4 | [oceanbase/seekdb#1511](https://github.com/oceanbase/seekdb/issues/1511) |
-| F5 | [oceanbase/seekdb#1535](https://github.com/oceanbase/seekdb/issues/1535) |
-| F6 | [oceanbase/seekdb#2209](https://github.com/oceanbase/seekdb/issues/2209) |
-| F8 | [oceanbase/seekdb#1534](https://github.com/oceanbase/seekdb/issues/1534) |
-| F9 | [oceanbase/seekdb#1440](https://github.com/oceanbase/seekdb/issues/1440) |
-| F10 | [oceanbase/seekdb#1513](https://github.com/oceanbase/seekdb/issues/1513) |
-| F11 | [oceanbase/seekdb#1512](https://github.com/oceanbase/seekdb/issues/1512) |
-| F12 | [oceanbase/seekdb#1538](https://github.com/oceanbase/seekdb/issues/1538) |
-| A3 | [oceanbase/seekdb#1470](https://github.com/oceanbase/seekdb/issues/1470) |
-| FA1 | [oceanbase/seekdb#1471](https://github.com/oceanbase/seekdb/issues/1471) |
-| FA2 | [oceanbase/seekdb#1472](https://github.com/oceanbase/seekdb/issues/1472) |
+| Rule | Issue                                                                    |
+| ---- | ------------------------------------------------------------------------ |
+| F1   | [oceanbase/seekdb#1501](https://github.com/oceanbase/seekdb/issues/1501) |
+| F2   | [oceanbase/seekdb#1439](https://github.com/oceanbase/seekdb/issues/1439) |
+| F3   | [oceanbase/seekdb#1489](https://github.com/oceanbase/seekdb/issues/1489) |
+| F4   | [oceanbase/seekdb#1511](https://github.com/oceanbase/seekdb/issues/1511) |
+| F5   | [oceanbase/seekdb#1535](https://github.com/oceanbase/seekdb/issues/1535) |
+| F6   | [oceanbase/seekdb#2209](https://github.com/oceanbase/seekdb/issues/2209) |
+| F8   | [oceanbase/seekdb#1534](https://github.com/oceanbase/seekdb/issues/1534) |
+| F9   | [oceanbase/seekdb#1440](https://github.com/oceanbase/seekdb/issues/1440) |
+| F10  | [oceanbase/seekdb#1513](https://github.com/oceanbase/seekdb/issues/1513) |
+| F11  | [oceanbase/seekdb#1512](https://github.com/oceanbase/seekdb/issues/1512) |
+| F12  | [oceanbase/seekdb#1538](https://github.com/oceanbase/seekdb/issues/1538) |
+| A3   | [oceanbase/seekdb#1470](https://github.com/oceanbase/seekdb/issues/1470) |
+| FA1  | [oceanbase/seekdb#1471](https://github.com/oceanbase/seekdb/issues/1471) |
+| FA2  | [oceanbase/seekdb#1472](https://github.com/oceanbase/seekdb/issues/1472) |
 
 ### Milvus
 
-| Rule | Issue |
-|---|---|
-| F1 | [milvus-io/milvus#54676](https://github.com/milvus-io/milvus/issues/54676) |
-| F2 | [milvus-io/milvus#54043](https://github.com/milvus-io/milvus/issues/54043) |
-| F3 | [milvus-io/milvus#54195](https://github.com/milvus-io/milvus/issues/54195) |
-| F4 | [milvus-io/milvus#54592](https://github.com/milvus-io/milvus/issues/54592) |
-| F5 | [milvus-io/milvus#54649](https://github.com/milvus-io/milvus/issues/54649) |
-| F6 | [milvus-io/milvus#54692](https://github.com/milvus-io/milvus/issues/54692) |
-| F8 | [milvus-io/milvus#54755](https://github.com/milvus-io/milvus/issues/54755) |
-| F9 | [milvus-io/milvus#54693](https://github.com/milvus-io/milvus/issues/54693) |
-| F10 | [milvus-io/milvus#54756](https://github.com/milvus-io/milvus/issues/54756) |
-| F12 | [milvus-io/milvus#54757](https://github.com/milvus-io/milvus/issues/54757) |
+| Rule | Issue                                                                      |
+| ---- | -------------------------------------------------------------------------- |
+| F1   | [milvus-io/milvus#54676](https://github.com/milvus-io/milvus/issues/54676) |
+| F2   | [milvus-io/milvus#54043](https://github.com/milvus-io/milvus/issues/54043) |
+| F3   | [milvus-io/milvus#54195](https://github.com/milvus-io/milvus/issues/54195) |
+| F4   | [milvus-io/milvus#54592](https://github.com/milvus-io/milvus/issues/54592) |
+| F5   | [milvus-io/milvus#54649](https://github.com/milvus-io/milvus/issues/54649) |
+| F6   | [milvus-io/milvus#54692](https://github.com/milvus-io/milvus/issues/54692) |
+| F8   | [milvus-io/milvus#54755](https://github.com/milvus-io/milvus/issues/54755) |
+| F9   | [milvus-io/milvus#54693](https://github.com/milvus-io/milvus/issues/54693) |
+| F10  | [milvus-io/milvus#54756](https://github.com/milvus-io/milvus/issues/54756) |
+| F12  | [milvus-io/milvus#54757](https://github.com/milvus-io/milvus/issues/54757) |
 
 ## Tested database versions
 
 The included Compose files pin the database versions used by this release:
 
-| Backend | Version and deployment |
-|---|---|
-| Milvus | 3.0.0, standalone, Rocksmq, etcd 3.5.25, MinIO object storage |
-| Qdrant | 1.19.0, single node |
-| pgvector | 0.8.2 on PostgreSQL 15 (`pgvector/pgvector:pg15`) |
-| seekDB | 1.4.0 (`1.4.0-100000172026082615`), single node |
-| Weaviate | 1.39.7, single node, one shard, one replica, no vectorizer |
+| Backend  | Version and deployment                                        |
+| -------- | ------------------------------------------------------------- |
+| Milvus   | 3.0.0, standalone, Rocksmq, etcd 3.5.25, MinIO object storage |
+| Qdrant   | 1.19.0, single node                                           |
+| pgvector | 0.8.2 on PostgreSQL 15 (`pgvector/pgvector:pg15`)             |
+| seekDB   | 1.4.0 (`1.4.0-100000172026082615`), single node               |
+| Weaviate | 1.39.7, single node, one shard, one replica, no vectorizer    |
 
 The paper experiments assigned each database container 8 physical CPU cores and 32 GiB of memory. `.env.example` contains the server20 CPU set (`13-20`). Change `VECPAT_CPUSET` to 8 valid CPUs on another host before running the pipeline.
 
@@ -216,4 +217,3 @@ vecpat_1/
 ├── Dockerfile*
 └── requirements*.txt
 ```
-
